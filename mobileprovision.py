@@ -74,18 +74,24 @@ def list(name,bundleid,distribution_only):
 View Command
 '''
 @click.command()
-@click.option('-n','--name',required=True,help="Search by Name")
+@click.argument("name",required=False)
 @click.option('-b','--bundleid',required=False,help="Search by BundleID")
 @click.option('-e','--entitlements-only',required=False,is_flag=True,default=False,help="Show Entitlements Only")
 def view(name,bundleid,entitlements_only):
     """View a specific mobile provisioning profile by name or bundleID"""
-
-    if (name is None and bundleid is None):
+    mode = None
+    if name is not None:
+        mode = SearchMode.Name
+    elif bundleid is not None:
+        mode = SearchMode.BundleID
+    else:
         print(click.style("Please specify -b bundleID or -n name",fg='red'))
+        return
 
+    foundProfile = False
     profile_list = getAllProfiles()
     for profile in profile_list:
-        if bundleid is not None:
+        if mode == SearchMode.BundleID:
             if profile["Entitlements"]["application-identifier"] == bundleid:
                 foundProfile = True
                 if entitlements_only == True:
@@ -94,7 +100,7 @@ def view(name,bundleid,entitlements_only):
                     runCmd(['security', 'cms', '-D', '-i', path + profile["filename"]])
                 break
             
-        elif (name is not None):
+        elif mode == SearchMode.Name:
             if profile["Name"] == name:
                 foundProfile = True
                 if entitlements_only == True:
@@ -105,6 +111,7 @@ def view(name,bundleid,entitlements_only):
 
     if not foundProfile:
         print(click.style("Profile Name must be an exact match, run the list command to see a list of profile names",fg='red'))
+
 
 '''
 Profile Path Command

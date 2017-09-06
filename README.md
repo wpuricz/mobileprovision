@@ -20,9 +20,9 @@ if you need to change the directory set an environment variable called MP_HOME t
     mp list -b "com.mycompany.app"  # List by bundle ID 
 
 #### Viewing
-View the entire raw mobile provision by app name, bundle ID, or filename. BundleID or name will need to be an exact match. App name can be found by using the list command.
+View the entire raw mobile provision by app name, or bundle ID. BundleID or name will need to be an exact match. App name can be found by using the list command.
 
-    mp view -n "My app" 
+    mp view "My app" 
     mp view -b "com.company.app"    
 
 #### Delete 
