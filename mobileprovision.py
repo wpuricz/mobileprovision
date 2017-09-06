@@ -22,33 +22,57 @@ if os.getenv("MP_HOME"):
 def cli(bundleid):
     """A tool for working with mobile provisioning profiles"""
 
-
+'''
+List Command
+'''
+@click.argument("name",required=False)
 @click.option('-b','--bundleID',required=False,help="Search by BundleID")
-@click.option('-v','--verbose',required=False,help="Verbose - will output filename, Name, AppIDName, and Bundle ID")
 @click.option('-d','--distribution-only',required=False,is_flag=True,default=False,help="Show Distribution Profiles Only")
 @click.command()
-def list(bundleid,verbose,distribution_only):
+def list(name,bundleid,distribution_only):
     """List all mobile provisioning profiles"""
+    mode = SearchMode.Name
+    if name is not None:
+        mode = SearchMode.Name
+    elif bundleid is not None:
+        mode = SearchMode.BundleID
+    else:
+        mode = SearchMode.All
+    
+    if distribution_only == True:
+        print(click.style("-d not implemented yet",fg='red'))
+        return
     profiles = []
     profile_list = getAllProfiles()
     for profile in profile_list:
         
         profile_type = "Distribution" if isDistribution(profile) else "Development"
         profile["type"] = profile_type
-        if not bundleid is None:
+
+        if mode == SearchMode.Name:
+            if name in profile["Name"]:
+                profiles.append(profile)
+
+        elif mode == SearchMode.BundleID:
             if bundleid in profile["Entitlements"]["application-identifier"]:
                 profiles.append(profile)
-        else:
+
+        elif mode == SearchMode.All:
             profiles.append(profile)
+        else:
+            print(click.style("Could not determine search mode",fg='red'))
+            return
 
     if len(profiles) == 0:
-        print(click.style("Could not find specified bundle ID",fg='red'))
+        print(click.style("No profiles found",fg='red'))
     else:
         for profile in profiles:
             print(click.style(profile["Name"],fg="green") + "\t" + click.style(profile["Entitlements"]["application-identifier"],fg='blue') + "\t" + click.style(profile["type"],fg='magenta'))
 
 
-
+'''
+View Command
+'''
 @click.command()
 @click.option('-n','--name',required=True,help="Search by Name")
 @click.option('-b','--bundleid',required=False,help="Search by BundleID")
@@ -82,7 +106,9 @@ def view(name,bundleid,entitlements_only):
     if not foundProfile:
         print(click.style("Profile Name must be an exact match, run the list command to see a list of profile names",fg='red'))
 
-
+'''
+Profile Path Command
+'''
 @click.command()
 @click.argument("name",required=True)
 def profile_path(name):
@@ -94,10 +120,13 @@ def profile_path(name):
             print path + profile["filename"]
             return
 
+'''
+Delete Command
+'''
 @click.command()
 @click.option('--all',help="Delete all provisioning profiles")
 def delete(all):
-    '''Delete a provisioning profile'''
+    """Delete a provisioning profile"""
 
 
 
@@ -150,6 +179,9 @@ def runCmd(cmdArray):
 def read_mobileprovision(mobileprovision_path):
     # From http://stackoverflow.com/questions/6398364/parsing-mobileprovision-files-in-bash/10490095#10490095
     return plistlib.readPlist(subprocess.Popen(['security', 'cms', '-D', '-i', mobileprovision_path], stdout=subprocess.PIPE).stdout)
+
+class SearchMode:
+    Name, BundleID, All = range(3)
 
 '''
 Add Commands to CLI

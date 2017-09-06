@@ -16,7 +16,8 @@ if you need to change the directory set an environment variable called MP_HOME t
 #### Listing 
 
     mp list                         # Lists all mobile provision profiles
-    mp list -b "com.mycompany.app"  # List all  
+    mp list "My app name"           # Lists by app name
+    mp list -b "com.mycompany.app"  # List by bundle ID 
 
 #### Viewing
 View the entire raw mobile provision by app name, bundle ID, or filename. BundleID or name will need to be an exact match. App name can be found by using the list command.
