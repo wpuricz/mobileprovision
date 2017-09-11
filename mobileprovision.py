@@ -20,7 +20,7 @@ if os.getenv("MP_HOME"):
 @click.group()
 @click.option('-b','--bundleID',required=False,help="Search by BundleID")
 def cli(bundleid):
-    """A tool for working with mobile provisioning profiles"""
+    """A tool for working with iOS provisioning profiles"""
 
 '''
 List Command
@@ -67,7 +67,7 @@ def list(name,bundleid,distribution_only):
         print(click.style("No profiles found",fg='red'))
     else:
         for profile in profiles:
-            print(click.style(profile["Name"],fg="green") + "\t" + click.style(profile["Entitlements"]["application-identifier"],fg='blue') + "\t" + click.style(profile["type"],fg='magenta'))
+            print(click.style(profile["Name"],fg="green") + "\t" + click.style(profile["Entitlements"]["application-identifier"],fg='blue') + "\t" + click.style(profile["type"],fg='magenta') + " " + profile["filename"])
 
 
 '''
@@ -78,7 +78,7 @@ View Command
 @click.option('-b','--bundleid',required=False,help="Search by BundleID")
 @click.option('-e','--entitlements-only',required=False,is_flag=True,default=False,help="Show Entitlements Only")
 def view(name,bundleid,entitlements_only):
-    """View a specific mobile provisioning profile by name or bundleID"""
+    """View a specific iOS provisioning profile by name or bundleID"""
     mode = None
     if name is not None:
         mode = SearchMode.Name
@@ -159,7 +159,7 @@ def getAllFiles():
         filelist.remove('.DS_Store')
     
     if(len(filelist) ==0):
-        print(click.style("Cannot find any mobile provisioning profiles",fg='red'))
+        print(click.style("Cannot find any provisioning profiles",fg='red'))
         return None
     else:
         return filelist
@@ -172,6 +172,7 @@ def getAllProfiles():
         mobileprovision_path = path  + file   
         profile = read_mobileprovision(mobileprovision_path)
         profile["filename"] = file
+        print(profile["filename"])
         profiles.append(profile)
 
     profiles.sort(key=itemgetter('Name'))
