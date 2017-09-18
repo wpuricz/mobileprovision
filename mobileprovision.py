@@ -172,7 +172,6 @@ def getAllProfiles():
         mobileprovision_path = path  + file   
         profile = read_mobileprovision(mobileprovision_path)
         profile["filename"] = file
-        print(profile["filename"])
         profiles.append(profile)
 
     profiles.sort(key=itemgetter('Name'))
